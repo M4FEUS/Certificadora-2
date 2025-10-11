@@ -36,8 +36,8 @@ O projeto é organizado em arquivos `.h` (cabeçalhos) e `.cpp` (implementação
 1.  **Instale o Arduino IDE:** Baixe e instale a versão mais recente do [Arduino IDE](https://www.arduino.cc/en/software).
 2.  **Clone o Repositório:**
     ```bash
-    git clone https://github.com/seu-usuario/ciencia-ou-consequencia.git
-    cd ciencia-ou-consequencia
+    git clone https://github.com/M4FEUS/Certificadora-2.git
+    cd Certificadora-2
     ```
 3.  **Organize os Arquivos:** Certifique-se de que os arquivos `.h` e `.cpp` de cada classe estejam na mesma pasta do arquivo `.ino` ou em subpastas reconhecidas pelo Arduino IDE (geralmente, o Arduino IDE trata arquivos `.h` e `.cpp` na mesma pasta do `.ino` como parte do sketch).
 4.  **Conecte o Hardware:** Monte o circuito do jogo "Ciência ou Consequência" conectando os botões, lâmpadas (via relé) e o Arduino conforme o esquema elétrico (a ser fornecido na documentação técnica).
