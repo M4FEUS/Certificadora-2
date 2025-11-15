@@ -1,33 +1,35 @@
 #include "Jogo.h"
 
-Jogo::Jogo() {
+// Tempo de exibição da pontuação em milissegundos
+const unsigned long TEMPO_MOSTRAR_PONTUACAO = 5000;
+
+Jogo::Jogo(DisplayLCD& display) : _display(display) {
     _numJogadores = 0;
     _numPerguntasCarregadas = 0;
     _perguntaAtualIndex = 0;
-    _jogoIniciado = false;
+    _jogadorQueRespondeu = -1;
+    _tempoDaUltimaAcao = 0;
+    _botaoReset = nullptr;
+    mudarEstado(FIM_DE_JOGO);
 }
 
-void Jogo::adicionarJogador(Jogador& jogador) {
+void Jogo::adicionarJogador(Jogador& jogador, Botao& botaoResposta, Lampada& lampada) {
     if (_numJogadores < MAX_JOGADORES) {
-        _jogadores[_numJogadores++] = &jogador;
+        _jogadores[_numJogadores] = &jogador;
+        _botoesResposta[_numJogadores] = &botaoResposta;
+        _lampadas[_numJogadores] = &lampada;
+        _numJogadores++;
     }
 }
 
-void Jogo::adicionarBotao(Botao& botao) {
-    // Assumindo que a ordem de adição de botões corresponde à ordem de jogadores
-    if (_numJogadores > 0 && _numJogadores <= MAX_JOGADORES) { // _numJogadores já foi incrementado pelo adicionarJogador
-        _botoes[_numJogadores - 1] = &botao;
-    }
-}
-
-void Jogo::adicionarLampada(Lampada& lampada) {
-    // Assumindo que a ordem de adição de lâmpadas corresponde à ordem de jogadores
-    if (_numJogadores > 0 && _numJogadores <= MAX_JOGADORES) {
-        _lampadas[_numJogadores - 1] = &lampada;
-    }
+void Jogo::adicionarBotoesMediador(Botao& botaoReset, Botao& botaoPonto1, Botao& botaoPonto2) {
+    _botaoReset = &botaoReset;
+    _botoesPonto[0] = &botaoPonto1;
+    _botoesPonto[1] = &botaoPonto2;
 }
 
 void Jogo::carregarPerguntas(Pergunta perguntas[], int numPerguntas) {
+    _numPerguntasCarregadas = 0;
     for (int i = 0; i < numPerguntas && i < MAX_PERGUNTAS; i++) {
         _perguntas[i] = &perguntas[i];
         _numPerguntasCarregadas++;
@@ -37,62 +39,121 @@ void Jogo::carregarPerguntas(Pergunta perguntas[], int numPerguntas) {
 
 void Jogo::iniciarJogo() {
     Serial.println("Iniciando Jogo Ciencia ou Consequencia!");
-    Serial.println("--------------------------------------");
+    _display.limpar();
+    _display.escrever("Ciencia ou", 0, 0);
+    _display.escrever("Consequencia!", 0, 1);
+    delay(2000);
+
     for (int i = 0; i < _numJogadores; i++) {
         _jogadores[i]->resetarPontuacao();
         _lampadas[i]->apagar();
     }
     _perguntaAtualIndex = 0;
-    _jogoIniciado = true;
-    apresentarPerguntaAtual();
+    mudarEstado(APRESENTANDO_PERGUNTA);
 }
 
-void Jogo::executarRodada() {
-    if (!_jogoIniciado || _perguntaAtualIndex >= _numPerguntasCarregadas) {
-        return; // Jogo não iniciado ou sem mais perguntas
+void Jogo::executar() {
+    // Lógica de Reset Global
+    if (_botaoReset != nullptr && _botaoReset->lerEstado()) {
+        iniciarJogo();
+        return;
     }
 
-    for (int i = 0; i < _numJogadores; i++) {
-        if (_botoes[i]->lerEstado()) {
-            processarPressionamentoBotao(i);
-            return; // Um botão foi pressionado, processa e sai do loop
+    switch (_estado) {
+        case APRESENTANDO_PERGUNTA:
+            apresentarPergunta();
+            break;
+        case AGUARDANDO_RESPOSTA_JOGADOR:
+            aguardarRespostaJogador();
+            break;
+        case AGUARDANDO_PONTUACAO_MEDIADOR:
+            aguardarPontuacaoMediador();
+            break;
+        case MOSTRANDO_PONTUACAO:
+            mostrarPontuacao();
+            break;
+        case FIM_DE_JOGO:
+            // O jogo fica parado, esperando o botão de reset
+            break;
+    }
+}
+
+void Jogo::mudarEstado(EstadoJogo novoEstado) {
+    _estado = novoEstado;
+    _tempoDaUltimaAcao = millis();
+    _display.limpar();
+    Serial.print("Novo Estado: ");
+    Serial.println(novoEstado);
+
+    if (novoEstado == APRESENTANDO_PERGUNTA) {
+        if (_perguntaAtualIndex < _numPerguntasCarregadas) {
+            apresentarPergunta();
+            mudarEstado(AGUARDANDO_RESPOSTA_JOGADOR);
+        } else {
+            mudarEstado(FIM_DE_JOGO);
+            _display.escrever("FIM DE JOGO!", 0, 0);
+            mostrarPontuacao();
         }
     }
 }
 
-void Jogo::proximaRodada() {
-    _perguntaAtualIndex++;
+void Jogo::apresentarPergunta() {
     if (_perguntaAtualIndex < _numPerguntasCarregadas) {
-        apresentarPerguntaAtual();
-    } else {
-        Serial.println("\nFim do Jogo! Nao ha mais perguntas.");
-        for (int i = 0; i < _numJogadores; i++) {
-            Serial.println(_jogadores[i]->getNome() + " pontuacao final: " + _jogadores[i]->getPontuacao());
+        String pergunta = _perguntas[_perguntaAtualIndex]->getTexto();
+        _display.escreverScroll(pergunta, 0, 300); // Mostra a pergunta na linha 0
+        _display.escrever("Aperte o botao!", 0, 1); // Mensagem na linha 1
+    }
+}
+
+void Jogo::aguardarRespostaJogador() {
+    for (int i = 0; i < _numJogadores; i++) {
+        if (_botoesResposta[i]->lerEstado()) {
+            // Jogador respondeu!
+            _jogadorQueRespondeu = i;
+            _lampadas[i]->acender();
+            mudarEstado(AGUARDANDO_PONTUACAO_MEDIADOR);
+            return;
         }
-        _jogoIniciado = false;
+    }
+}
+
+void Jogo::aguardarPontuacaoMediador() {
+    // Exibe quem respondeu
+    _display.escrever(_jogadores[_jogadorQueRespondeu]->getNome(), 0, 0);
+    _display.escrever("respondeu!", 0, 1);
+
+    // Verifica botões de pontuação do mediador
+    for (int i = 0; i < _numJogadores; i++) {
+        if (_botoesPonto[i] != nullptr && _botoesPonto[i]->lerEstado()) {
+            // Ponto para o jogador i
+            _jogadores[i]->adicionarPontos(1);
+            Serial.println(_jogadores[i]->getNome() + " pontuou!");
+            
+            // Apaga a luz do jogador que respondeu
+            _lampadas[_jogadorQueRespondeu]->apagar();
+            
+            // Avança para a próxima rodada
+            _perguntaAtualIndex++;
+            mudarEstado(MOSTRANDO_PONTUACAO);
+            return;
+        }
+    }
+}
+
+void Jogo::mostrarPontuacao() {
+    _display.escrever("Pontuacao:", 0, 0);
+    String pontuacaoStr = _jogadores[0]->getNome().substring(0, 1) + ":" + String(_jogadores[0]->getPontuacao()) + "  " +
+                          _jogadores[1]->getNome().substring(0, 1) + ":" + String(_jogadores[1]->getPontuacao());
+    _display.escrever(pontuacaoStr, 0, 1);
+
+    // Espera o tempo definido antes de ir para a próxima pergunta
+    if (millis() - _tempoDaUltimaAcao >= TEMPO_MOSTRAR_PONTUACAO) {
+        mudarEstado(APRESENTANDO_PERGUNTA);
     }
 }
 
 void Jogo::reiniciarJogo() {
-    _jogoIniciado = false;
     iniciarJogo();
-}
-
-void Jogo::apresentarPerguntaAtual() {
-    if (_perguntaAtualIndex < _numPerguntasCarregadas) {
-        Serial.println("\nPERGUNTA: " + _perguntas[_perguntaAtualIndex]->getTexto());
-        Serial.println("Pressione o botao para responder!");
-    }
-}
-
-void Jogo::processarPressionamentoBotao(int jogadorIndex) {
-    Serial.println(_jogadores[jogadorIndex]->getNome() + " pressionou o botao!");
-    _lampadas[jogadorIndex]->acender();
-    _jogadores[jogadorIndex]->adicionarPontos(1); // Exemplo: adiciona 1 ponto
-    Serial.println(_jogadores[jogadorIndex]->getNome() + " pontuacao: " + _jogadores[jogadorIndex]->getPontuacao());
-    delay(2000); // Espera para visualização
-    _lampadas[jogadorIndex]->apagar();
-    proximaRodada();
 }
 
 void Jogo::embaralharPerguntas() {
