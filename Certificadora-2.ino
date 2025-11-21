@@ -140,10 +140,16 @@ void setup() {
 
     int valorPot = analogRead(PINO_POTENCIOMETRO);
     
+    // Debug: mostra o valor lido no Serial
+    Serial.print(F("Valor do potenciometro: "));
+    Serial.println(valorPot);
+    
     // Se o potenciômetro não estiver conectado (valor muito próximo de 0 ou 1023),
     // usa o nível MÉDIO como padrão
-    if (valorPot < 10 || valorPot > 1013) {
+    // Ajustado para ser menos restritivo - só força médio se realmente desconectado
+    if (valorPot <= 5 || valorPot >= 1020) {
         // Potenciômetro provavelmente desconectado, usa padrão MÉDIO
+        Serial.println(F("Potenciometro desconectado, usando MEDIO"));
         valorPot = 500; // Valor médio para forçar nível MÉDIO
     }
     
