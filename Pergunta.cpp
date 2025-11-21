@@ -1,15 +1,22 @@
 #include "Pergunta.h"
 
-Pergunta::Pergunta(String texto, String respostaCorreta) {
-    _texto = texto;
-    _respostaCorreta = respostaCorreta;
+Pergunta::Pergunta() : _textoPROGMEM(nullptr), _respostaCorreta('\0') {
 }
 
-String Pergunta::getTexto() {
-    return _texto;
+Pergunta::Pergunta(const char* textoPROGMEM, char respostaCorreta) 
+    : _textoPROGMEM(textoPROGMEM), _respostaCorreta(respostaCorreta) {
 }
 
-String Pergunta::getRespostaCorreta() {
+void Pergunta::getTexto(char* buffer, int tamanho) {
+    if (_textoPROGMEM == nullptr) {
+        buffer[0] = '\0';
+        return;
+    }
+    strncpy_P(buffer, _textoPROGMEM, tamanho - 1);
+    buffer[tamanho - 1] = '\0';
+}
+
+char Pergunta::getRespostaCorreta() {
     return _respostaCorreta;
 }
 

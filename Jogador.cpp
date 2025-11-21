@@ -1,11 +1,13 @@
 #include "Jogador.h"
+#include <string.h>
 
-Jogador::Jogador(String nome) {
-    _nome = nome;
+Jogador::Jogador(const char* nome) {
+    strncpy(_nome, nome, 15);
+    _nome[15] = '\0';
     _pontuacao = 0;
 }
 
-String Jogador::getNome() {
+const char* Jogador::getNome() {
     return _nome;
 }
 

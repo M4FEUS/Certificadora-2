@@ -5,14 +5,14 @@
 
 class Jogador {
 public:
-    Jogador(String nome);
-    String getNome();
+    Jogador(const char* nome);
+    const char* getNome();
     int getPontuacao();
     void adicionarPontos(int pontos);
     void resetarPontuacao();
 
 private:
-    String _nome;
+    char _nome[16]; // Tamanho fixo para economizar memória
     int _pontuacao;
 };
 

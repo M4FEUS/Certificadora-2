@@ -38,10 +38,10 @@ void Jogo::carregarPerguntas(Pergunta perguntas[], int numPerguntas) {
 }
 
 void Jogo::iniciarJogo() {
-    Serial.println("Iniciando Jogo Ciencia ou Consequencia!");
+    Serial.println(F("Iniciando Jogo Ciencia ou Consequencia!"));
     _display.limpar();
-    _display.escrever("Ciencia ou", 0, 0);
-    _display.escrever("Consequencia!", 0, 1);
+    _display.escrever(F("Ciencia ou"), 0, 0);
+    _display.escrever(F("Consequencia!"), 0, 1);
     delay(2000);
 
     for (int i = 0; i < _numJogadores; i++) {
@@ -91,7 +91,7 @@ void Jogo::mudarEstado(EstadoJogo novoEstado) {
             mudarEstado(AGUARDANDO_RESPOSTA_JOGADOR);
         } else {
             mudarEstado(FIM_DE_JOGO);
-            _display.escrever("FIM DE JOGO!", 0, 0);
+            _display.escrever(F("FIM DE JOGO!"), 0, 0);
             mostrarPontuacao();
         }
     }
@@ -99,9 +99,10 @@ void Jogo::mudarEstado(EstadoJogo novoEstado) {
 
 void Jogo::apresentarPergunta() {
     if (_perguntaAtualIndex < _numPerguntasCarregadas) {
-        String pergunta = _perguntas[_perguntaAtualIndex]->getTexto();
+        char pergunta[80]; // Buffer temporário
+        _perguntas[_perguntaAtualIndex]->getTexto(pergunta, 80);
         _display.escreverScroll(pergunta, 0, 300); // Mostra a pergunta na linha 0
-        _display.escrever("Aperte o botao!", 0, 1); // Mensagem na linha 1
+        _display.escrever(F("Aperte o botao!"), 0, 1); // Mensagem na linha 1
     }
 }
 
@@ -120,14 +121,15 @@ void Jogo::aguardarRespostaJogador() {
 void Jogo::aguardarPontuacaoMediador() {
     // Exibe quem respondeu
     _display.escrever(_jogadores[_jogadorQueRespondeu]->getNome(), 0, 0);
-    _display.escrever("respondeu!", 0, 1);
+    _display.escrever(F("respondeu!"), 0, 1);
 
     // Verifica botões de pontuação do mediador
     for (int i = 0; i < _numJogadores; i++) {
         if (_botoesPonto[i] != nullptr && _botoesPonto[i]->lerEstado()) {
             // Ponto para o jogador i
             _jogadores[i]->adicionarPontos(1);
-            Serial.println(_jogadores[i]->getNome() + " pontuou!");
+            Serial.print(_jogadores[i]->getNome());
+            Serial.println(F(" pontuou!"));
             
             // Apaga a luz do jogador que respondeu
             _lampadas[_jogadorQueRespondeu]->apagar();
@@ -141,9 +143,13 @@ void Jogo::aguardarPontuacaoMediador() {
 }
 
 void Jogo::mostrarPontuacao() {
-    _display.escrever("Pontuacao:", 0, 0);
-    String pontuacaoStr = _jogadores[0]->getNome().substring(0, 1) + ":" + String(_jogadores[0]->getPontuacao()) + "  " +
-                          _jogadores[1]->getNome().substring(0, 1) + ":" + String(_jogadores[1]->getPontuacao());
+    _display.escrever(F("Pontuacao:"), 0, 0);
+    char pontuacaoStr[17];
+    char nome1 = _jogadores[0]->getNome()[0];
+    char nome2 = _jogadores[1]->getNome()[0];
+    snprintf_P(pontuacaoStr, 17, PSTR("%c:%d  %c:%d"), 
+               nome1, _jogadores[0]->getPontuacao(),
+               nome2, _jogadores[1]->getPontuacao());
     _display.escrever(pontuacaoStr, 0, 1);
 
     // Espera o tempo definido antes de ir para a próxima pergunta
