@@ -24,7 +24,7 @@ class Jogo {
 public:
     Jogo(DisplayLCD& display);
     void adicionarJogador(Jogador& jogador, Botao& botaoResposta, Lampada& lampada);
-    void adicionarBotoesMediador(Botao& botaoReset, Botao& botaoPonto1, Botao& botaoPonto2);
+    void adicionarBotoesMediador(Botao& botaoPonto1, Botao& botaoPonto2);
     void carregarPerguntas(Pergunta perguntas[], int numPerguntas);
     void iniciarJogo();
     void executar();

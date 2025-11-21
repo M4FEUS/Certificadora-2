@@ -9,16 +9,20 @@
 
 // --- Configuração do LCD (Modo 4 bits) ---
 // RS=12, E=11, D4=10, D5=9, D6=A1, D7=A2
-DisplayLCD display(12, 11, 10, 9, A1, A2);
+DisplayLCD display(7, 6, 5, 4, 3, 2);
 
 // --- Pinos do Hardware ---
 // Jogador 1
-const int PINO_BOTAO_J1 = 2;
-const int PINO_LAMPADA_J1 = 3;
+const int PINO_BOTAO_J1 = 10;
+const int PINO_LAMPADA_J1 = 12;
 
 // Jogador 2
-const int PINO_BOTAO_J2 = 4;
-const int PINO_LAMPADA_J2 = 5;
+const int PINO_BOTAO_J2 = 11;
+const int PINO_LAMPADA_J2 = 9;
+
+// Botões do Mediador (Pontuação)
+const int PINO_BOTAO_PONTO_J1 = 0;  // Botão para pontuar Jogador 1
+const int PINO_BOTAO_PONTO_J2 = 1;  // Botão para pontuar Jogador 2
 
 // Potenciômetro de Dificuldade
 const int PINO_POTENCIOMETRO = A0; 
@@ -32,6 +36,10 @@ Lampada lampadaJ1(PINO_LAMPADA_J1);
 Jogador jogador2("Jogador 2");
 Botao botaoJ2(PINO_BOTAO_J2);
 Lampada lampadaJ2(PINO_LAMPADA_J2);
+
+// Botões do Mediador
+Botao botaoPontoJ1(PINO_BOTAO_PONTO_J1);
+Botao botaoPontoJ2(PINO_BOTAO_PONTO_J2);
 
 // ==========================================================================
 // BANCO DE PERGUNTAS (Colados do seu arquivo) - Usando PROGMEM
@@ -121,6 +129,9 @@ void setup() {
     // Configuração do Jogo
     meuJogo.adicionarJogador(jogador1, botaoJ1, lampadaJ1);
     meuJogo.adicionarJogador(jogador2, botaoJ2, lampadaJ2);
+    
+    // Configuração dos botões do mediador (pontuação)
+    meuJogo.adicionarBotoesMediador(botaoPontoJ1, botaoPontoJ2);
 
     // --- Leitura da Dificuldade ---
     display.limpar();
@@ -128,6 +139,13 @@ void setup() {
     delay(1000); // Tempo para o usuário girar o potenciômetro se quiser
 
     int valorPot = analogRead(PINO_POTENCIOMETRO);
+    
+    // Se o potenciômetro não estiver conectado (valor muito próximo de 0 ou 1023),
+    // usa o nível MÉDIO como padrão
+    if (valorPot < 10 || valorPot > 1013) {
+        // Potenciômetro provavelmente desconectado, usa padrão MÉDIO
+        valorPot = 500; // Valor médio para forçar nível MÉDIO
+    }
     
     if (valorPot < 341) { 
         Serial.println(F("Dificuldade: FACIL"));

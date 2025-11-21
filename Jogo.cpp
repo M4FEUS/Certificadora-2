@@ -22,8 +22,7 @@ void Jogo::adicionarJogador(Jogador& jogador, Botao& botaoResposta, Lampada& lam
     }
 }
 
-void Jogo::adicionarBotoesMediador(Botao& botaoReset, Botao& botaoPonto1, Botao& botaoPonto2) {
-    _botaoReset = &botaoReset;
+void Jogo::adicionarBotoesMediador(Botao& botaoPonto1, Botao& botaoPonto2) {
     _botoesPonto[0] = &botaoPonto1;
     _botoesPonto[1] = &botaoPonto2;
 }
