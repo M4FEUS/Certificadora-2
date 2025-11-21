@@ -136,7 +136,7 @@ void setup() {
     // --- Leitura da Dificuldade ---
     display.limpar();
     display.escrever(F("Selecione Nivel"), 0, 0);
-    delay(1000); // Tempo para o usuário girar o potenciômetro se quiser
+    delay(3000); // Tempo para o usuário girar o potenciômetro (3 segundos)
 
     int valorPot = analogRead(PINO_POTENCIOMETRO);
     
