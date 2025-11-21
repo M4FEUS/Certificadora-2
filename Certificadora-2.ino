@@ -21,8 +21,8 @@ const int PINO_BOTAO_J2 = 11;
 const int PINO_LAMPADA_J2 = 9;
 
 // Botões do Mediador (Pontuação)
-const int PINO_BOTAO_PONTO_J1 = 0;  // Botão para pontuar Jogador 1
-const int PINO_BOTAO_PONTO_J2 = 1;  // Botão para pontuar Jogador 2
+const int PINO_BOTAO_PONTO_J1 = A5;  // Botão para pontuar Jogador 1
+const int PINO_BOTAO_PONTO_J2 = A4;  // Botão para pontuar Jogador 2
 
 // Potenciômetro de Dificuldade
 const int PINO_POTENCIOMETRO = A0; 

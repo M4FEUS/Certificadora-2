@@ -11,6 +11,8 @@ public:
 private:
     int _pino;
     bool _estadoAnterior;
+    unsigned long _tempoInicializacao;
+    static const unsigned long TEMPO_AQUECIMENTO = 200; // 200ms após inicialização
 };
 
 #endif

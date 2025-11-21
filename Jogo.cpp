@@ -10,6 +10,10 @@ Jogo::Jogo(DisplayLCD& display) : _display(display) {
     _jogadorQueRespondeu = -1;
     _tempoDaUltimaAcao = 0;
     _botaoReset = nullptr;
+    // Inicializa os botões de pontuação como nullptr
+    for (int i = 0; i < MAX_JOGADORES; i++) {
+        _botoesPonto[i] = nullptr;
+    }
     mudarEstado(FIM_DE_JOGO);
 }
 
@@ -121,6 +125,12 @@ void Jogo::aguardarPontuacaoMediador() {
     // Exibe quem respondeu
     _display.escrever(_jogadores[_jogadorQueRespondeu]->getNome(), 0, 0);
     _display.escrever(F("respondeu!"), 0, 1);
+
+    // Aguarda um pequeno delay após entrar neste estado para evitar detecção falsa
+    // de botões logo após a mudança de estado (problema de ruído/inicialização)
+    if (millis() - _tempoDaUltimaAcao < 100) {
+        return; // Ignora leituras nos primeiros 100ms após mudar para este estado
+    }
 
     // Verifica botões de pontuação do mediador
     for (int i = 0; i < _numJogadores; i++) {
