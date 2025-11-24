@@ -97,7 +97,7 @@ O projeto é organizado em arquivos `.h` (cabeçalhos) e `.cpp` (implementação
 
 6.  **Inicie o Jogo:**
     *   Após o upload, o jogo iniciará automaticamente.
-    *   O display mostrará "Selecione Nivel" - você tem 3 segundos para ajustar o potenciômetro:
+    *   O display mostrará "Selecione Nivel" - você tem 5 segundos para ajustar o potenciômetro:
         - **Fácil:** Gire para a esquerda (valores 0-340)
         - **Médio:** Gire para o meio (valores 341-681)
         - **Difícil:** Gire para a direita (valores 682-1023)
