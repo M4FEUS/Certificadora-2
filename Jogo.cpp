@@ -104,7 +104,7 @@ void Jogo::apresentarPergunta() {
     if (_perguntaAtualIndex < _numPerguntasCarregadas) {
         char pergunta[80]; // Buffer temporário
         _perguntas[_perguntaAtualIndex]->getTexto(pergunta, 80);
-        _display.escreverScroll(pergunta, 0, 300); // Mostra a pergunta na linha 0
+        _display.escreverScroll(pergunta, 0, 600); // Mostra a pergunta na linha 0 (velocidade mais lenta)
         _display.escrever(F("Aperte o botao!"), 0, 1); // Mensagem na linha 1
     }
 }

@@ -184,7 +184,7 @@ void setup() {
         meuJogo.carregarPerguntas(perguntas, 17);
     }
     
-    delay(2000); // Espera 2 segundos para ler o nível na tela
+    delay(5000); // Espera 5 segundos para ler o nível na tela
     display.limpar();
     
     // Inicia o jogo
